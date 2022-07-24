@@ -23,6 +23,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+private:
+
 	// UPROPERTY(EditAnywhere)
 	// int32 MyInt = 99;
 
@@ -47,16 +49,24 @@ public:
 	// UPROPERTY(EditAnywhere)
 	// float XOfMyVector = 0;
 
-	UPROPERTY(EditAnywhere, Category="Moving Platform")
+	UPROPERTY(EditAnywhere, Category="Moving")
 	FVector PlatformVelocity = FVector(100,0,0);
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Moving")
 	float MaxMovedDistanceAllowed = 1000;
+	UPROPERTY(EditAnywhere, Category="Rotation")
+	FRotator RotationVelocity;
 	// UPROPERTY(VisibleAnywhere)
 	// float DistanceMoved = -1;
 
 
 	FVector StartLocation;
 
-	
 
+	void MovePlatform(float DeltaTime);
+
+	void RotatePlatform(float DeltaTime);
+
+	bool ShouldPlatformReturn() const;
+
+	float GetDistanceMoved() const;
 };

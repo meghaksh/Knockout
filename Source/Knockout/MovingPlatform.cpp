@@ -22,6 +22,11 @@ void AMovingPlatform::BeginPlay()
 	//SetActorLocation(MyVector);
 
 	StartLocation = GetActorLocation();
+
+	FString name = GetName();		//gives the name of the actor.
+
+	UE_LOG(LogTemp, Display, TEXT("Configured Moved Distance : %s"), *name);
+	
 	
 }
 
@@ -29,30 +34,73 @@ void AMovingPlatform::BeginPlay()
 void AMovingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 	//FVector MyLocalVector = MyVector;
 	//MyLocalVector.Z += 100;
 	//MyVector.Y += 1;
 	//SetActorLocation(MyLocalVector);
 
-	//Moveing platform forward
-		//1.Get current location
-	FVector CurrentLocation = GetActorLocation();
-		//2. Add vector to the current location
-	CurrentLocation += (PlatformVelocity * DeltaTime);
-		//3. Set the location
-	SetActorLocation(CurrentLocation);
+
+	MovePlatform(DeltaTime);
+	RotatePlatform(DeltaTime);
+}
+
+//A prefix is for the Actor
+void AMovingPlatform :: MovePlatform(float DeltaTime)
+{
+	// //Moveing platform forward
+	// 	//1.Get current location
+	// FVector CurrentLocation = GetActorLocation();
+	// 	//2. Add vector to the current location
+	// CurrentLocation += (PlatformVelocity * DeltaTime);
+	// 	//3. Set the location
+	// SetActorLocation(CurrentLocation);
 
 	//Moving platform backward
 		//1. Check how far it has gone
-		float DistanceMoved = FVector::Dist(CurrentLocation, StartLocation);
+		//float DistanceMoved = FVector::Dist(CurrentLocation, StartLocation);
 		//2. Reverse direction of motion if too far. 
-		if(DistanceMoved>MaxMovedDistanceAllowed){
-			
+		if(ShouldPlatformReturn()){
+			// float OverShoot = DistanceMoved - MaxMovedDistanceAllowed;
+
+			// FString name = GetName();
+			// UE_LOG(LogTemp, Display, TEXT("OverShoot of the %s : %f"), *name, OverShoot);
 			FVector MoveDirection = PlatformVelocity.GetSafeNormal();
 			StartLocation = StartLocation + MoveDirection * MaxMovedDistanceAllowed;
 			SetActorLocation(StartLocation);
 			PlatformVelocity = -PlatformVelocity;
+		}else{
+			//Moveing platform forward
+					//1.Get current location
+				FVector CurrentLocation = GetActorLocation();
+					//2. Add vector to the current location
+				CurrentLocation += (PlatformVelocity * DeltaTime);
+					//3. Set the location
+				SetActorLocation(CurrentLocation);
 		}
+}
 
+void AMovingPlatform :: RotatePlatform(float DeltaTime)
+{
+	//UE_LOG(LogTemp, Display, TEXT("RotatePlatformFunction of %s") ,*GetName());
+
+	//This doesn't work sometime due to complexity with rotation as it wraps around current rotation and we need to reset it. 
+	// FRotator CurrentRotation = GetActorRotation();
+	// CurrentRotation = CurrentRotation + RotationVelocity * DeltaTime;
+	// SetActorRotation(CurrentRotation);
+
+	//This is a better approach than shown above. 
+	AddActorLocalRotation( RotationVelocity *  DeltaTime );
+
+}
+
+bool AMovingPlatform :: ShouldPlatformReturn() const
+{
+	return GetDistanceMoved()>MaxMovedDistanceAllowed;
+}
+
+float AMovingPlatform :: GetDistanceMoved() const
+{
+	return FVector::Dist(GetActorLocation(), StartLocation);
 }
 
